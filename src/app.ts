@@ -7,7 +7,7 @@ import { treeOf, today, type YearNode } from './calendar'
 import { headingText } from './heading'
 import { parseLines, isTag, bareTag, type Piece } from './tags'
 import { isSearchable } from './search'
-import { isSubmit, isCancel, onLeave, grownHeight } from './input'
+import { followsKeyboard, isSubmit, isCancel, onLeave, grownHeight } from './input'
 import { saveDraft, loadDraft } from './draft'
 import { needsHint, hintShown } from './hint'
 import { enqueue, dequeue, markFailed, reasonOf, next, withPending, isPending, load, save, type Pending } from './queue'
@@ -861,6 +861,15 @@ const fitInput = () => {
 ta.addEventListener('input', () => {
   fitInput()
   saveDraft(ta.value, localStorage)
+})
+
+// 키보드가 올라오면 껍데기가 화면을 그만큼 줄인다. 줄어든 만큼 아래가 가려지므로
+// 쓰는 중이면 마지막 글이 보이도록 따라간다
+let viewHeight = window.innerHeight
+window.addEventListener('resize', () => {
+  const before = viewHeight
+  viewHeight = window.innerHeight
+  if (followsKeyboard({ before, after: viewHeight, writing: document.activeElement === ta })) scrollToLatest()
 })
 
 // Enter 로 남긴다는 것은 한 번만 알려준다. 닫으면 설명서에서 다시 볼 수 있다

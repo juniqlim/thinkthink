@@ -27,12 +27,22 @@ final class WebViewController: UIViewController {
      */
     private var lastKnown: CLLocation?
 
+    /**
+     웹뷰 바닥. 키보드가 올라오면 그만큼 끌어올린다.
+
+     그대로 두면 키보드가 웹을 덮고, 웹은 쓰는 칸만 밀어 올려 보여준다 —
+     방금 쓴 글은 키보드 밑에 남아 스크롤해야 보인다. 화면을 줄이면 웹이
+     줄어든 크기에 맞춰 마지막 글까지 놓는다.
+     */
+    private var bottom: NSLayoutConstraint!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .themed
         setUpWebView()
         setUpLocations()
         watchLifecycle()
+        watchKeyboard()
         webView.load(URLRequest(url: Self.home))
     }
 
@@ -66,9 +76,10 @@ final class WebViewController: UIViewController {
 
         // 웹앱은 안전영역을 셈하지 않는다. 홈 화면 웹앱일 때와 같은 자리에 둔다
         let safe = view.safeAreaLayoutGuide
+        bottom = webView.bottomAnchor.constraint(equalTo: safe.bottomAnchor)
         NSLayoutConstraint.activate([
             webView.topAnchor.constraint(equalTo: safe.topAnchor),
-            webView.bottomAnchor.constraint(equalTo: safe.bottomAnchor),
+            bottom,
             webView.leadingAnchor.constraint(equalTo: safe.leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: safe.trailingAnchor),
         ])
@@ -104,6 +115,32 @@ final class WebViewController: UIViewController {
 
     @objc private func resume() { locations.startUpdatingLocation() }
     @objc private func pause() { locations.stopUpdatingLocation() }
+
+    // MARK: - 키보드
+
+    private func watchKeyboard() {
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(keyboardMoved),
+            name: UIResponder.keyboardWillChangeFrameNotification, object: nil
+        )
+    }
+
+    /**
+     키보드가 덮는 높이만큼 웹뷰를 줄인다.
+
+     키보드 틀은 화면 좌표라 이 뷰로 옮겨 겹치는 만큼만 잰다. 내려가면
+     겹침이 0 이라 제자리로 돌아온다. 안전영역 아래 여백은 이미 비워
+     두었으므로 그만큼은 뺀다.
+     */
+    @objc private func keyboardMoved(_ note: Notification) {
+        guard let end = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        let frame = view.convert(end, from: nil)
+        let covered = max(0, view.bounds.maxY - frame.minY)
+        bottom.constant = -max(0, covered - view.safeAreaInsets.bottom)
+
+        let duration = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double ?? 0.25
+        UIView.animate(withDuration: duration) { self.view.layoutIfNeeded() }
+    }
 }
 
 /**

@@ -44,3 +44,15 @@ export function grownHeight(
 ): number {
   return box.scrollHeight + box.offsetHeight - box.clientHeight
 }
+
+/**
+ * 키보드가 올라와 화면이 줄었을 때 마지막 글을 따라갈지 정한다.
+ *
+ * 줄어든 만큼 아래가 가려져 방금 쓴 글이 키보드 밑으로 들어간다. 쓰는 중에는
+ * 그 글이 보여야 한다. 읽는 중에 화면이 바뀐 것까지 옮기면 보던 자리를 잃는다.
+ */
+export function followsKeyboard(
+  view: { before: number; after: number; writing: boolean },
+): boolean {
+  return view.writing && view.after < view.before
+}

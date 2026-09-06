@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isSubmit, isCancel, onLeave, grownHeight } from '../src/input'
+import { isSubmit, isCancel, onLeave, grownHeight, followsKeyboard } from '../src/input'
 
 const key = (key: string, opts: { shiftKey?: boolean; isComposing?: boolean } = {}) =>
   ({ key, shiftKey: opts.shiftKey ?? false, isComposing: opts.isComposing ?? false })
@@ -70,5 +70,21 @@ describe('고치는 칸을 글에 맞춰 재기', () => {
 
   it('테두리가 없으면 잰 그대로다', () => {
     expect(grownHeight({ scrollHeight: 300, offsetHeight: 160, clientHeight: 160 })).toBe(300)
+  })
+})
+
+
+describe('키보드가 올라올 때 마지막 글을 따라가기', () => {
+  // 화면이 줄어드는 만큼 아래가 가려진다. 쓰는 중이면 방금 쓴 글이 보여야 한다
+  it('쓰는 중에 화면이 줄면 따라간다', () => {
+    expect(followsKeyboard({ before: 800, after: 500, writing: true })).toBe(true)
+  })
+
+  it('쓰는 중이 아니면 따라가지 않는다 — 읽던 자리를 옮기면 안 된다', () => {
+    expect(followsKeyboard({ before: 800, after: 500, writing: false })).toBe(false)
+  })
+
+  it('화면이 늘어난 것은 키보드가 내려간 것이라 따라가지 않는다', () => {
+    expect(followsKeyboard({ before: 500, after: 800, writing: true })).toBe(false)
   })
 })
