@@ -3,7 +3,7 @@ import {
   timeOf, copyEntryText, copyGroupText, tweetLength, TWEET_LIMIT, groupByDate, tagsOf,
   type LogEntry, type TagCount,
 } from './timeline'
-import { treeOf, today, type YearNode } from './calendar'
+import { treeOf, today, mondayOf, weeksOf, type YearNode } from './calendar'
 import { headingText } from './heading'
 import { parseLines, isTag, bareTag, type Piece } from './tags'
 import { isSearchable } from './search'
@@ -42,6 +42,8 @@ let tab: TabId = 'date'
 let trashCount = 0
 let openYears = new Set<number>()
 let openMonths = new Set<string>()
+let openWeeks = new Set<string>()
+const weekKey = (m: { year: number; month: number; day: number }) => `${m.year}-${m.month}-${m.day}`
 let unwatch: (() => void) | null = null
 
 const $ = (id: string) => document.getElementById(id)!
@@ -230,8 +232,11 @@ async function loadIndex() {
   tree = treeOf(idx.dates)
   tags = tagsOf(idx.tags.map(t => ({ tags: t })))
   if (!view) view = todayView()
-  if (view.kind === 'month' || view.kind === 'day') openYears.add(view.year)
-  if (view.kind === 'day') openMonths.add(`${view.year}-${view.month}`)
+  if (view.kind === 'month' || view.kind === 'day' || view.kind === 'week') openYears.add(view.year)
+  if (view.kind === 'day' || view.kind === 'week') {
+    openMonths.add(`${view.year}-${view.month}`)
+    openWeeks.add(weekKey(mondayOf(view.year, view.month, view.day)))
+  }
 }
 
 async function refresh() {
@@ -625,14 +630,38 @@ function renderDateTree(box: HTMLElement) {
       box.appendChild(m)
       if (!monthOpen) continue
 
-      for (const d of mn.days) {
-        const dayOn = view?.kind === 'day'
-          && view.year === node.year && view.month === mn.month && view.day === d
-        const b = document.createElement('button')
-        b.className = 'dy' + (dayOn ? ' on' : '')
-        b.textContent = pad(d)
-        b.onclick = () => pick({ kind: 'day', year: node.year, month: mn.month, day: d })
-        box.appendChild(b)
+      for (const wk of weeksOf(node.year, mn.month, mn.days)) {
+        const wkey = weekKey(wk.monday)
+        const weekOpen = openWeeks.has(wkey)
+        const weekOn = view?.kind === 'week' && weekKey(view) === wkey
+        const sun = new Date(wk.monday.year, wk.monday.month - 1, wk.monday.day + 6)
+
+        const w = document.createElement('div')
+        w.className = 'row wk' + (weekOn ? ' on' : '')
+        const wcaret = document.createElement('button')
+        wcaret.className = 'caret btn'
+        wcaret.textContent = weekOpen ? '⌄' : '›'
+        wcaret.onclick = () => {
+          weekOpen ? openWeeks.delete(wkey) : openWeeks.add(wkey)
+          renderSidebar()
+        }
+        const wlabel = document.createElement('button')
+        wlabel.className = 'label'
+        wlabel.textContent = `${pad(wk.monday.day)} ~ ${pad(sun.getDate())}`
+        wlabel.onclick = () => pick({ kind: 'week', ...wk.monday })
+        w.append(wcaret, wlabel)
+        box.appendChild(w)
+        if (!weekOpen) continue
+
+        for (const d of wk.days) {
+          const dayOn = view?.kind === 'day'
+            && view.year === node.year && view.month === mn.month && view.day === d
+          const b = document.createElement('button')
+          b.className = 'dy' + (dayOn ? ' on' : '')
+          b.textContent = pad(d)
+          b.onclick = () => pick({ kind: 'day', year: node.year, month: mn.month, day: d })
+          box.appendChild(b)
+        }
       }
     }
   }

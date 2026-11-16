@@ -59,6 +59,37 @@ export function dayRange(year: number, month: number, day: number): { from: stri
   }
 }
 
+/** 주는 월요일에 시작한다 */
+export function mondayOf(year: number, month: number, day: number): YearMonthDay {
+  const d = new Date(year, month - 1, day)
+  d.setDate(d.getDate() - (d.getDay() + 6) % 7)
+  return today(d)
+}
+
+export interface WeekNode {
+  monday: YearMonthDay
+  days: number[]
+}
+
+/** 최신순 일(days)을 주로 묶는다 — 순서는 그대로 둔다 */
+export function weeksOf(year: number, month: number, days: number[]): WeekNode[] {
+  const weeks: WeekNode[] = []
+  for (const day of days) {
+    const monday = mondayOf(year, month, day)
+    const last = weeks[weeks.length - 1]
+    if (last && last.monday.day === monday.day && last.monday.month === monday.month) last.days.push(day)
+    else weeks.push({ monday, days: [day] })
+  }
+  return weeks
+}
+
+export function weekRange(year: number, month: number, day: number): { from: string; to: string } {
+  return {
+    from: new Date(year, month - 1, day).toISOString(),
+    to: new Date(year, month - 1, day + 7).toISOString(),
+  }
+}
+
 export function daysAgo(days: number, now: Date): string {
   return new Date(now.getTime() - days * 24 * 60 * 60 * 1000).toISOString()
 }

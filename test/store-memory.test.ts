@@ -81,6 +81,17 @@ describe('memoryStore — 쓰고 읽기', () => {
     expect((await store.list(month)).map(e => e.body)).toEqual(['25일', '26일'])
   })
 
+  it('한 주는 월요일부터 일요일까지 모아본다', async () => {
+    const { store, set } = make()
+    await store.add('토', null)
+    set('2026-07-26T10:00:00Z')
+    await store.add('일', null)
+    set('2026-07-27T10:00:00Z')
+    await store.add('다음 주 월', null)
+    expect((await store.list({ kind: 'week', year: 2026, month: 7, day: 20 })).map(e => e.body))
+      .toEqual(['토', '일'])
+  })
+
   it('태그로 모아본다', async () => {
     const { store } = make()
     await store.add('가 #책', null)

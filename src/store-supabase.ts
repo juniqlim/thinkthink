@@ -4,7 +4,7 @@ import type { Index, Store, View } from './store'
 import { TRASH_DAYS } from './store'
 import { extractTags } from './tags'
 import { matches } from './search'
-import { monthRange, dayRange, daysAgo } from './calendar'
+import { monthRange, dayRange, weekRange, daysAgo } from './calendar'
 import { importKey, encrypt, decrypt, isEncrypted } from './crypto'
 import { metaText } from './import'
 import type { Exported } from './export'
@@ -147,6 +147,9 @@ export function supabaseStore(): Store {
         q = q.gte('created_at', from).lt('created_at', to)
       } else if (view.kind === 'day') {
         const { from, to } = dayRange(view.year, view.month, view.day)
+        q = q.gte('created_at', from).lt('created_at', to)
+      } else if (view.kind === 'week') {
+        const { from, to } = weekRange(view.year, view.month, view.day)
         q = q.gte('created_at', from).lt('created_at', to)
       } else if (view.kind === 'tag') {
         q = q.contains('tags', [view.tag])

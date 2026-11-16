@@ -17,6 +17,11 @@ describe('headingText', () => {
       .toBe('2026. 03')
   })
 
+  it('한 주를 보고 있으면 월요일부터 일요일까지다', () => {
+    expect(headingText({ kind: 'week', year: 2026, month: 10, day: 26 }, 5, 7))
+      .toBe('2026. 10. 26 ~ 11. 01')
+  })
+
   it('태그 모아보기는 태그 이름만 보인다', () => {
     expect(headingText({ kind: 'tag', tag: '일기' }, 5, 7)).toBe('#일기')
   })

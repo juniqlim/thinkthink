@@ -162,6 +162,13 @@ describe('큐 — 화면에 얹기', () => {
 
     expect(shown).toHaveLength(1)
   })
+
+  it('그 주를 보고 있으면 얹는다', () => {
+    const q = [p('a', new Date(2026, 6, 26, 10).toISOString())]
+
+    expect(withPending([], q, { kind: 'week', year: 2026, month: 7, day: 20 })).toHaveLength(1)
+    expect(withPending([], q, { kind: 'week', year: 2026, month: 7, day: 27 })).toEqual([])
+  })
 })
 
 

@@ -11,6 +11,7 @@
 import type { LogEntry } from './timeline'
 import type { View } from './store'
 import { extractTags } from './tags'
+import { weekRange } from './calendar'
 
 export interface Pending {
   /** 앱이 만든다. 서버에 올라간 뒤의 id 와는 다르다 */
@@ -97,6 +98,10 @@ function belongs(item: Pending, view: View): boolean {
   }
   if (view.kind === 'month') {
     return d.getFullYear() === view.year && d.getMonth() + 1 === view.month
+  }
+  if (view.kind === 'week') {
+    const { from, to } = weekRange(view.year, view.month, view.day)
+    return d >= new Date(from) && d < new Date(to)
   }
   if (view.kind === 'tag') return extractTags(item.body).includes(view.tag)
   // 휴지통은 지운 것을 보는 자리고, 검색은 올라간 글을 훑는 자리다

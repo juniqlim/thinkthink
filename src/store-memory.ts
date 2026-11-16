@@ -3,7 +3,7 @@ import type { Index, Store, View } from './store'
 import { TRASH_DAYS } from './store'
 import { extractTags } from './tags'
 import { matches } from './search'
-import { monthRange, dayRange, daysAgo } from './calendar'
+import { monthRange, dayRange, weekRange, daysAgo } from './calendar'
 import { metaText } from './import'
 import type { Exported } from './export'
 
@@ -77,6 +77,10 @@ export function memoryStore(clock: () => Date = () => new Date()): Store {
       }
       if (view.kind === 'day') {
         const { from, to } = dayRange(view.year, view.month, view.day)
+        return between(live, from, to)
+      }
+      if (view.kind === 'week') {
+        const { from, to } = weekRange(view.year, view.month, view.day)
         return between(live, from, to)
       }
       if (view.kind === 'tag') return live.filter(e => e.tags.includes(view.tag))

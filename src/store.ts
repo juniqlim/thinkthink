@@ -8,6 +8,8 @@ export const TRASH_DAYS = 7
 export type View =
   | { kind: 'month'; year: number; month: number }
   | { kind: 'day'; year: number; month: number; day: number }
+  /** year·month·day 는 그 주의 월요일 */
+  | { kind: 'week'; year: number; month: number; day: number }
   | { kind: 'tag'; tag: string }
   | { kind: 'search'; q: string }
   | { kind: 'trash' }
