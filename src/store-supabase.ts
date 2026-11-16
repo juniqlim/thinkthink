@@ -10,6 +10,7 @@ import { metaText } from './import'
 import type { Exported } from './export'
 import { share } from './share'
 import { loadKey, saveKey, clearKey } from './keycache'
+import { keyError } from './denied'
 
 const SUPABASE_URL = 'https://zuvifgiiahbypxsvnzvg.supabase.co'
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1dmlmZ2lpYWhieXB4c3ZuenZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ4NTMwNDQsImV4cCI6MjEwMDQyOTA0NH0.sVexgnQmy0YRcg3bjq0ThHB8sgPLtn1X3SDDyUbeG18'
@@ -73,7 +74,7 @@ export function supabaseStore(): Store {
   /** 부팅 한 번에 로그인 사실이 세 번 온다. 열쇠는 그중 한 번만 받아오면 된다 */
   const fetchKey = share(async (token: string): Promise<CryptoKey> => {
     const res = await fetch('/api/key', { headers: { authorization: `Bearer ${token}` } })
-    if (!res.ok) throw new Error(`키를 받지 못했다 (${res.status})`)
+    if (!res.ok) throw keyError(res.status)
     const { key: raw } = await res.json() as { key: string }
     const imported = await importKey(raw)
     void saveKey(imported, Date.now())   // 다음 부팅은 이 왕복(폰에서 2.5초)을 건너뛴다

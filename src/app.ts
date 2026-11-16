@@ -22,6 +22,7 @@ import { wasSignedIn } from './signedin'
 import { insideNative, fixFromNative } from './native'
 import { share } from './share'
 import { swipeAction, type Point } from './swipe'
+import { isDenied } from './denied'
 
 /** 뒤가 Supabase 인지 메모리인지 이 파일은 모른다 */
 const store: Store = pickStore()
@@ -168,8 +169,18 @@ async function refreshAuth() {
   } catch (e) {
     // 키가 없으면 본문을 읽을 수도 쓸 수도 없다. 반쯤 열린 앱을 보여주지 않는다
     console.error(e)
-    $('authmsg').textContent = '암호화 키를 받지 못했습니다. 새로고침해 보세요.'
-    ready = false; stopWatching(); showAuth(); return
+    ready = false; stopWatching(); showAuth()
+    if (isDenied(e)) {
+      // 다른 계정으로 다시 들어올 수 있게 내보낸다
+      const msg = $('authmsg')
+      msg.replaceChildren('thinkthink 는 개인용으로 운영 중입니다. 써보고 싶으면 ')
+      const a = Object.assign(document.createElement('a'), { href: 'https://juniq.im', textContent: 'juniq.im', target: '_blank', rel: 'noopener' })
+      msg.append(a, ' 으로 연락 주세요.')
+      await store.signOut()
+    } else {
+      $('authmsg').textContent = '암호화 키를 받지 못했습니다. 새로고침해 보세요.'
+    }
+    return
   }
   if (!who) { ready = false; stopWatching(); showAuth(); return }
   ready = true
