@@ -4,6 +4,7 @@ import {
   type LogEntry, type TagCount,
 } from './timeline'
 import { treeOf, today, mondayOf, weeksOf, weekNumber, type YearNode } from './calendar'
+import { neighbor } from './step'
 import { headingText } from './heading'
 import { parseLines, isTag, bareTag, type Piece } from './tags'
 import { isSearchable } from './search'
@@ -762,13 +763,28 @@ function renderAll() {
   renderTimeline()
 }
 
+function arrow(label: string, name: string, to: View | null): HTMLElement {
+  const b = document.createElement('button')
+  b.className = 'step'; b.textContent = label; b.title = name
+  if (to) b.onclick = () => pick(to)
+  else b.style.visibility = 'hidden'
+  return b
+}
+
 function renderHeading() {
   const title = $('htitle')
   const act = $('hact')
   act.textContent = ''
   if (!view) { title.textContent = ''; return }
 
-  title.textContent = headingText(view, entries.length, TRASH_DAYS)
+  title.textContent = ''
+  const text = span('txt', headingText(view, entries.length, TRASH_DAYS))
+  // 기간 보기일 때만 화살표를 단다. 갈 곳이 없는 쪽은 자리만 지켜 제목이 흔들리지 않게 한다
+  if (view.kind === 'day' || view.kind === 'week' || view.kind === 'month') {
+    title.append(arrow('‹', '이전', neighbor(view, -1, new Date())), text, arrow('›', '다음', neighbor(view, 1, new Date())))
+  } else {
+    title.append(text)
+  }
 
   // day 뷰는 목록 머리말을 숨기므로 그날 전체 복사를 여기에 둔다
   if (view.kind === 'day' && entries.length > 0) {

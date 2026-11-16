@@ -52,8 +52,10 @@
   header { position:sticky; top:0; z-index:15; background:var(--bg);
            padding:1px 16px 4px; border-bottom:1px solid var(--line); font-weight:600;
            display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; }
-  #htitle { font-size:13px; color:var(--strong); text-align:center;
-            white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #htitle { font-size:13px; color:var(--strong); display:flex; align-items:center; justify-content:center;
+            gap:6px; min-width:0; }
+  #htitle .txt { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .step { background:none; border:0; color:var(--mute); font:inherit; font-size:16px; cursor:pointer; padding:2px 6px; }
   #hact { display:flex; align-items:center; justify-content:flex-end; gap:4px; font-size:13px; }
   #hact a { color:var(--accent); cursor:pointer; font-weight:400; }
   #app { display:flex; flex-direction:column; min-height:100vh; }
