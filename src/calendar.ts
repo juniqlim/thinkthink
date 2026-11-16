@@ -66,6 +66,14 @@ export function mondayOf(year: number, month: number, day: number): YearMonthDay
   return today(d)
 }
 
+/** ISO 주차 — 그 주의 목요일이 속한 해에서 몇째 주인가 */
+export function weekNumber(year: number, month: number, day: number): number {
+  const thu = new Date(year, month - 1, day)
+  thu.setDate(thu.getDate() - (thu.getDay() + 6) % 7 + 3)
+  const jan1 = new Date(thu.getFullYear(), 0, 1)
+  return Math.floor(Math.round((thu.getTime() - jan1.getTime()) / 86400000) / 7) + 1
+}
+
 export interface WeekNode {
   monday: YearMonthDay
   days: number[]

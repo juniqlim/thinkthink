@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { treeOf, monthRange, dayRange, mondayOf, weekRange, weeksOf, latestMonth, daysAgo, today } from '../src/calendar'
+import { treeOf, monthRange, dayRange, mondayOf, weekRange, weeksOf, weekNumber, latestMonth, daysAgo, today } from '../src/calendar'
 
 
 describe('today', () => {
@@ -106,6 +106,19 @@ describe('weekRange', () => {
 
     expect(from).toBe(new Date(2026, 10, 16).toISOString())
     expect(to).toBe(new Date(2026, 10, 23).toISOString())
+  })
+})
+
+
+describe('weekNumber', () => {
+  it('ISO 주차 — 1월 4일이 든 주가 1주다', () => {
+    expect(weekNumber(2026, 11, 16)).toBe(47)
+    expect(weekNumber(2026, 1, 1)).toBe(1)
+  })
+
+  it('해를 넘는 주는 목요일이 속한 해를 따른다', () => {
+    expect(weekNumber(2025, 12, 29)).toBe(1)
+    expect(weekNumber(2027, 1, 1)).toBe(53)
   })
 })
 

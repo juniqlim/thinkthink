@@ -14,6 +14,11 @@ describe('CSP', () => {
     expect(CSP).not.toContain(`connect-src *`)
   })
 
+  it('index.html 에 인라인 스크립트가 없다 — script-src 가 막는다', () => {
+    const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8')
+    expect(html).not.toMatch(/<script(?![^>]*\bsrc=)[^>]*>/)
+  })
+
   it('남의 페이지에 끼워 넣지 못한다', () => {
     expect(CSP).toContain(`frame-ancestors 'none'`)
   })

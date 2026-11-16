@@ -3,7 +3,7 @@ import {
   timeOf, copyEntryText, copyGroupText, tweetLength, TWEET_LIMIT, groupByDate, tagsOf,
   type LogEntry, type TagCount,
 } from './timeline'
-import { treeOf, today, mondayOf, weeksOf, type YearNode } from './calendar'
+import { treeOf, today, mondayOf, weeksOf, weekNumber, type YearNode } from './calendar'
 import { headingText } from './heading'
 import { parseLines, isTag, bareTag, type Piece } from './tags'
 import { isSearchable } from './search'
@@ -634,7 +634,6 @@ function renderDateTree(box: HTMLElement) {
         const wkey = weekKey(wk.monday)
         const weekOpen = openWeeks.has(wkey)
         const weekOn = view?.kind === 'week' && weekKey(view) === wkey
-        const sun = new Date(wk.monday.year, wk.monday.month - 1, wk.monday.day + 6)
 
         const w = document.createElement('div')
         w.className = 'row wk' + (weekOn ? ' on' : '')
@@ -647,7 +646,7 @@ function renderDateTree(box: HTMLElement) {
         }
         const wlabel = document.createElement('button')
         wlabel.className = 'label'
-        wlabel.textContent = `${pad(wk.monday.day)} ~ ${pad(sun.getDate())}`
+        wlabel.textContent = `W${weekNumber(wk.monday.year, wk.monday.month, wk.monday.day)}`
         wlabel.onclick = () => pick({ kind: 'week', ...wk.monday })
         w.append(wcaret, wlabel)
         box.appendChild(w)
