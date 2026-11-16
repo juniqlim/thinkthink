@@ -4,7 +4,7 @@ import {
   type LogEntry, type TagCount,
 } from './timeline'
 import { treeOf, today, mondayOf, weeksOf, weekNumber, type YearNode } from './calendar'
-import { neighbor } from './step'
+import { neighbor, presents } from './step'
 import { headingText } from './heading'
 import { parseLines, isTag, bareTag, type Piece } from './tags'
 import { isSearchable } from './search'
@@ -223,8 +223,6 @@ function todayView(): View {
   return { kind: 'day', ...today(new Date()) }
 }
 
-const isToday = (v: View) =>
-  v.kind === 'day' && JSON.stringify(v) === JSON.stringify(todayView())
 
 /** 사이드바 재료(전체 날짜·태그)를 다시 읽는다 */
 async function loadIndex() {
@@ -794,11 +792,14 @@ function renderHeading() {
     act.appendChild(all)
   }
 
-  if (isToday(view)) return
-  const back = document.createElement('a')
-  back.textContent = '오늘'
-  back.onclick = () => pick(todayView())
-  act.appendChild(back)
+  // 늘 같은 자리에 둔다. 지금 보고 있는 곳은 표시만 한다
+  for (const { label, name, view: to } of presents(new Date())) {
+    const go = document.createElement('a')
+    go.textContent = label; go.title = name
+    if (JSON.stringify(to) === JSON.stringify(view)) go.className = 'on'
+    go.onclick = () => pick(to)
+    act.appendChild(go)
+  }
 }
 
 function renderTimeline() {

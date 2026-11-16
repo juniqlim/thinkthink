@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { neighbor } from '../src/step'
+import { neighbor, presents } from '../src/step'
 
 const now = new Date(2026, 10, 16, 14)
 
@@ -31,5 +31,16 @@ describe('neighbor', () => {
     expect(neighbor({ kind: 'tag', tag: '일기' }, 1, now)).toBeNull()
     expect(neighbor({ kind: 'search', q: 'a' }, -1, now)).toBeNull()
     expect(neighbor({ kind: 'trash' }, -1, now)).toBeNull()
+  })
+})
+
+
+describe('presents', () => {
+  it('오늘·이번 주·이번 달로 바로 간다', () => {
+    expect(presents(now)).toEqual([
+      { label: 'D', name: '오늘', view: { kind: 'day', year: 2026, month: 11, day: 16 } },
+      { label: 'W', name: '이번 주', view: { kind: 'week', year: 2026, month: 11, day: 16 } },
+      { label: 'M', name: '이번 달', view: { kind: 'month', year: 2026, month: 11 } },
+    ])
   })
 })
