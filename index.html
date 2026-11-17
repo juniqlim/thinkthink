@@ -131,7 +131,6 @@
              border-radius:10px; padding:9px 11px; font:inherit; min-height:42px; max-height:160px; }
   button.send { background:var(--accent); color:var(--bg); border:0; border-radius:10px; padding:0 16px; font-weight:600; cursor:pointer; }
   .brand { display:flex; align-items:center; gap:10px; }
-  #boot { background:none; border:0; font-size:11px; color:var(--dim); cursor:pointer; padding:0 6px; }
   #menu { background:none; border:0; color:var(--strong); font-size:18px; cursor:pointer; padding:0; }
   #skin { background:none; border:0; font-size:13px; line-height:1; cursor:pointer; padding:0; }
   #sidebar { position:fixed; top:0; left:0; bottom:0; width:190px; z-index:20;
@@ -200,7 +199,7 @@
   <header>
     <!-- 밝기는 자주 바꾼다. 메뉴를 열게 하지 않는다 -->
     <!-- 부팅 시간은 메뉴 옆에 붙는다. 헤더는 세 칸이라 제 칸을 차지하면 제목이 밀린다 -->
-    <span class="brand"><button id="menu" title="목록">☰</button><button id="skin" title="밝기"></button><button id="boot" title="부팅 시간 복사" hidden></button></span>
+    <span class="brand"><button id="menu" title="목록">☰</button><button id="skin" title="밝기"></button></span>
     <span id="htitle"></span>
     <span id="hact"></span>
   </header>

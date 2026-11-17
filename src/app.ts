@@ -18,7 +18,6 @@ import { plan } from './import'
 import { currentTheme, toggle, label, barColor, KEY, type Theme } from './theme'
 import { TRASH_DAYS, type Store, type View } from './store'
 import { pickStore } from './store-pick'
-import { report, type Mark } from './boot'
 import { wasSignedIn } from './signedin'
 import { insideNative, fixFromNative } from './native'
 import { share } from './share'
@@ -48,27 +47,6 @@ const weekKey = (m: { year: number; month: number; day: number }) => `${m.year}-
 let unwatch: (() => void) | null = null
 
 const $ = (id: string) => document.getElementById(id)!
-
-/* ---- 부팅에 걸린 시간 (원인을 찾으면 지운다) ---- */
-
-/** 여기까지 온 것만으로 이미 내려받고 해석하는 시간이 지났다 */
-const marks: Mark[] = [{ name: '스크립트', at: performance.now() }]
-
-/** 재로그인이나 탭 복귀로 다시 불려도 첫 부팅의 숫자를 덮지 않는다 */
-let booted = false
-
-const mark = (name: string) => { if (!booted) marks.push({ name, at: performance.now() }) }
-
-function showBoot() {
-  if (booted) return
-  booted = true
-
-  const text = report(marks, performance.getEntriesByType('resource'))
-  const btn = $('boot') as HTMLButtonElement
-  btn.textContent = `${Math.round(marks[marks.length - 1].at)}ms`
-  btn.hidden = false
-  btn.onclick = () => { void copyToClipboard(text, btn) }
-}
 
 /** 글자는 글자로 넣는다 — 붙이는 값이 HTML 로 해석될 여지를 없앤다 */
 function span(className: string, text: string): HTMLSpanElement {
@@ -187,10 +165,8 @@ async function refreshAuth() {
   }
   if (!who) { ready = false; stopWatching(); showAuth(); return }
   ready = true
-  mark('세션·키')
 
   showApp(); await refreshOnBoot('boot')
-  mark('첫 그리기'); showBoot()
   void flush()   // 지난번에 못 보낸 글부터 치운다
   unwatch ??= store.watch(() => { void refresh() })
   trackLocation()   // 맨 끝에 — 위치를 묻는 동안 다른 일이 밀리지 않게
